@@ -1,5 +1,5 @@
 {
-  "name": "use-state-hooks",
+  "name": "use-better-state",
   "version": "0.1.0",
   "scripts": {
     "build": "npx father  build",
