@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "downlevelIteration": true,
+    "declaration": true,
+    "jsx": "react"
+  },
+  "exclude": [
+      "node_modules",
+      "dist",
+      "typings",
+      "**/__test__",
+      "test",
+      "tests"
+  ],
+  "include": ["./src/*.ts"],
+}
