@@ -11,7 +11,12 @@ better react useState, and simplify state writing, provide global state manageme
   <img src="https://img.shields.io/github/issues/hawx1993/use-better-state" />
 </p>
 
+### Quick Start
 
+```bash
+$ yarn add use-better-state
+```
+## API
 ### useCurrentState & updateCurrentState
 
 Update the state of the current view, equals to useState updater.
