@@ -1,6 +1,6 @@
 {
   "name": "use-better-state",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "scripts": {
     "build": "npx father  build",
     "version": "npm run build",
