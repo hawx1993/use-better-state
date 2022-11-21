@@ -116,9 +116,30 @@ const cleanStore = (store, key) => {
     console.error('cleaning ${key} store failed!', error.message);
   }
 };
-const useCurrentState = <State>(initialState?: State) => {
+
+/**
+ * 更新当前view的state，view 和 viewModel 适用
+ * 参数：updateCurrentState(value)
+ */
+const _updateCurrentState = <ValueType = any>(
+  incomingValue: ValueType,
+  key,
+) => {
+  updatedStateValue<typeof key, ValueType>(
+    key,
+    incomingValue,
+    STORE_TYPE.CURRENT_STATE,
+  );
+  emitUpdate<typeof key, ValueType>(key, STORE_TYPE.CURRENT_STATE);
+};
+
+type ReturnCurrentStateType = {
+  updateCurrentState: Dispatch<SetStateAction<any>>;
+};
+const useCurrentState = <State>(
+  initialState?: State,
+): ReturnCurrentStateType & State => {
   const key = useState(() => nanoid())[0];
-  globalStore.set(STORE_TYPE.CURRENT_STATE, key);
   setDefaultValue(key, STORE_TYPE.CURRENT_STATE, initialState);
   const current = getStoreValue(key, STORE_TYPE.CURRENT_STATE, initialState);
   const state = useState(current.value);
@@ -134,27 +155,18 @@ const useCurrentState = <State>(initialState?: State) => {
     return cleanup;
   }, []);
   current.updaters.add(state[1]);
-  return current?.value || {};
-};
-/**
- * 更新当前view的state，view 和 viewModel 适用
- * 参数：updateCurrentState(value)
- */
-const updateCurrentState = <ValueType = any>(incomingValue: ValueType) => {
-  const key = globalStore.get(STORE_TYPE.CURRENT_STATE);
-  updatedStateValue<typeof key, ValueType>(
-    key,
-    incomingValue,
-    STORE_TYPE.CURRENT_STATE,
-  );
-  emitUpdate<typeof key, ValueType>(key, STORE_TYPE.CURRENT_STATE);
+  return {
+    ...current?.value,
+    updateCurrentState: (incomingValue: any) =>
+      _updateCurrentState(incomingValue, key),
+  };
 };
 
 /**
  * 通过key更新全局view 对应的state，view 和 viewModel 适用
  * 参数：updateGlobalStateByKey(key, value)
  */
-const updateGlobalStateByKey = <K, ValueType = any>(
+const _updateGlobalStateByKey = <K, ValueType = any>(
   key: K,
   incomingValue: ValueType,
 ) => {
@@ -165,7 +177,17 @@ const updateGlobalStateByKey = <K, ValueType = any>(
  * hooks，获取全局 view 对应的state，仅view 适用
  * 参数：useGlobalState(key, initialState?)
  */
-const useGlobalState = <K, State>(key: K, initialState?: State) => {
+/**
+ * @param initialState
+ * @returns {state, updater}
+ */
+type ReturnGlobalStateType = {
+  updateGlobalStateByKey: Dispatch<SetStateAction<any>>;
+};
+const useGlobalState = <K, State>(
+  key: K,
+  initialState?: State,
+): ReturnGlobalStateType & State => {
   setDefaultValue(key, STORE_TYPE.GLOBAL_STATE, initialState);
   const current = getStoreValue(key, STORE_TYPE.GLOBAL_STATE, initialState);
   const state = useState(current.value);
@@ -180,12 +202,17 @@ const useGlobalState = <K, State>(key: K, initialState?: State) => {
     return cleanup;
   }, []);
   current.updaters.add(state[1]);
-  return current?.value || {};
+  return {
+    ...current?.value,
+    updateGlobalStateByKey: (global_key, incomingValue) =>
+      _updateGlobalStateByKey(global_key, incomingValue),
+  };
 };
 
-export {
-  useCurrentState,
-  updateCurrentState,
-  updateGlobalStateByKey,
-  useGlobalState,
+export { useCurrentState, useGlobalState };
+
+(global as any).globalStore = {
+  globalState,
+  currentState,
+  globalStore,
 };
