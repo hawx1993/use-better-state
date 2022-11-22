@@ -1,5 +1,6 @@
 import { SetStateAction, useState, Dispatch, useEffect } from 'react';
 import { nanoid } from 'nanoid';
+import { produce } from 'immer';
 
 const globalState = new Map();
 const currentState = new Map();
@@ -133,8 +134,31 @@ const _updateCurrentState = <ValueType = any>(
   emitUpdate<typeof key, ValueType>(key, STORE_TYPE.CURRENT_STATE);
 };
 
+/**
+ * 使用immer 细粒度更新当前view的state，view 和 viewModel 适用;
+ * updateImmerState(stateKey: string, fn)
+ */
+const _updateImmerState = (
+  stateKey: string,
+  fn: (draftState: any) => void,
+  key: string,
+) => {
+  const currentState = getStoreValue(key, STORE_TYPE.CURRENT_STATE);
+  const baseState = currentState?.value?.[stateKey];
+  const nextState = produce(baseState, (draftState) => {
+    fn(draftState);
+  });
+  _updateCurrentState(
+    {
+      [stateKey]: nextState,
+    },
+    key,
+  );
+};
+
 type ReturnCurrentStateType = {
   updateCurrentState: Dispatch<SetStateAction<any>>;
+  updateImmerState: (stateKey: string, fn: (draftState: any) => void) => void;
 };
 const useCurrentState = <State>(
   initialState?: State,
@@ -159,6 +183,8 @@ const useCurrentState = <State>(
     ...current?.value,
     updateCurrentState: (incomingValue: any) =>
       _updateCurrentState(incomingValue, key),
+    updateImmerState: (stateKey: string, fn: (draftState: any) => void) =>
+      _updateImmerState(stateKey, fn, key),
   };
 };
 
@@ -173,6 +199,25 @@ const _updateGlobalStateByKey = <K, ValueType = any>(
   updatedStateValue<K, ValueType>(key, incomingValue, STORE_TYPE.GLOBAL_STATE);
   emitUpdate<K, ValueType>(key, STORE_TYPE.GLOBAL_STATE);
 };
+
+/**
+ * 使用immer 细粒度更新全局state，view 和 viewModel 适用;
+ * updateGlobalImmerState(globalKey, stateKey: string, fn)
+ */
+const _updateGlobalImmerState = <K>(
+  globalKey: K,
+  stateKey: string,
+  fn: (draftState: any) => void,
+) => {
+  const globalState = getStoreValue(globalKey, STORE_TYPE.GLOBAL_STATE);
+  const baseState = globalState?.value?.[stateKey];
+  const nextState = produce(baseState, (draftState) => {
+    fn(draftState);
+  });
+  _updateGlobalStateByKey(globalKey, {
+    [stateKey]: nextState,
+  });
+};
 /**
  * hooks，获取全局 view 对应的state，仅view 适用
  * 参数：useGlobalState(key, initialState?)
@@ -182,7 +227,11 @@ const _updateGlobalStateByKey = <K, ValueType = any>(
  * @returns {state, updater}
  */
 type ReturnGlobalStateType = {
-  updateGlobalStateByKey: Dispatch<SetStateAction<any>>;
+  updateGlobalState: Dispatch<SetStateAction<any>>;
+  updateGlobalImmerState: (
+    stateKey: string,
+    fn: (draftState: any) => void,
+  ) => void;
 };
 const useGlobalState = <K, State>(
   key: K,
@@ -204,8 +253,10 @@ const useGlobalState = <K, State>(
   current.updaters.add(state[1]);
   return {
     ...current?.value,
-    updateGlobalStateByKey: (global_key, incomingValue) =>
-      _updateGlobalStateByKey(global_key, incomingValue),
+    updateGlobalState: (incomingValue) =>
+      _updateGlobalStateByKey(key, incomingValue),
+    updateGlobalImmerState: (stateKey: string, fn: (draftState: any) => void) =>
+      _updateGlobalImmerState(key, stateKey, fn),
   };
 };
 
