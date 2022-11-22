@@ -22,13 +22,15 @@ Update the state of the current view, equals to useState updater.
 
 value：state value to update
 
+you can destruct `updateImmerState` and `updateCurrentState` from useCurrentState
+
 >Examples
 
 ```tsx
 import {  useCurrentState } from 'use-better-state';,
 
 export const Parent = () => {
-  const { count = 0, name = 'init name', updateCurrentState , updateImmerState} = useCurrentStat({
+  const { count = 0, name = 'init name', updateCurrentState , updateImmerState} = useCurrentState({
      user: {
         name: 'nilu',
         age: 0,
@@ -59,10 +61,12 @@ export const Parent = () => {
 
 Respond to updates from updateGlobalState across components to automatically render the current component
 
+you can destruct `updateGlobalImmerState` and `updateGlobalState` from useGlobalState
+
 ```tsx
 // Parent.tsx
 export const Parent = () => {
-  const { count, updateGlobalState } = useGlobalState(
+  const { count, updateGlobalState, updateGlobalImmerState } = useGlobalState(
     GLOBAL_KEYS.GLOBAL_COUNT,
     { count: 0, userInfo: { name: 'apple', age: 1 } }
   );
