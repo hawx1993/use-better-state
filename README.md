@@ -10,6 +10,22 @@ better react useState, and simplify state writing, provide global state manageme
   <img src="https://img.shields.io/github/issues/hawx1993/use-better-state" />
 </p>
 
+with `use-better-state`, you don't need to 
+
+```ts
+const [name, setName] = useState();
+const [user, setUser] = useState();
+const ....
+```
+just do :
+
+```ts
+const {name = '' ,user = 0, updateCurrentState} = useCurrentState();
+
+updateCurrentState({
+  name: 'nilu', age: 1
+})
+```
 ### Quick Start
 
 ```bash
