@@ -56,7 +56,7 @@ export const Parent = () => {
     updateCurrentState({ count: count + 1, name: 'mike' });
 
   const updateUserInfo = () => {
-    updateImmerState('user', draft => {
+    updateImmerState(draft => {
       draft.age = 11;
     });
   };
@@ -89,7 +89,7 @@ export const Parent = () => {
   const increment = () => updateGlobalState({ count: count + 1 });
 
   const updateGlobalUser = () => {
-    updateGlobalImmerState('userInfo', draft => {
+    updateGlobalImmerState(draft => {
       draft.age = 21;
     });
   };

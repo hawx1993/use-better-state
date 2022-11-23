@@ -138,27 +138,17 @@ const _updateCurrentState = <ValueType = any>(
  * 使用immer 细粒度更新当前view的state，view 和 viewModel 适用;
  * updateImmerState(stateKey: string, fn)
  */
-const _updateImmerState = (
-  stateKey: string,
-  fn: (draftState: any) => void,
-  key: string,
-) => {
-  const currentState = getStoreValue(key, STORE_TYPE.CURRENT_STATE);
-  const baseState = currentState?.value?.[stateKey];
-  const nextState = produce(baseState, (draftState) => {
+const _updateImmerState = (fn: (draftState: any) => void, key: string) => {
+  const currentState = getStoreValue(key, STORE_TYPE.CURRENT_STATE).value;
+  const nextState = produce(currentState, (draftState) => {
     fn(draftState);
   });
-  _updateCurrentState(
-    {
-      [stateKey]: nextState,
-    },
-    key,
-  );
+  _updateCurrentState(nextState, key);
 };
 
 type ReturnCurrentStateType = {
   updateCurrentState: Dispatch<SetStateAction<any>>;
-  updateImmerState: (stateKey: string, fn: (draftState: any) => void) => void;
+  updateImmerState: (fn: (draftState: any) => void) => void;
 };
 const useCurrentState = <State>(
   initialState?: State,
@@ -183,8 +173,8 @@ const useCurrentState = <State>(
     ...current?.value,
     updateCurrentState: (incomingValue: any) =>
       _updateCurrentState(incomingValue, key),
-    updateImmerState: (stateKey: string, fn: (draftState: any) => void) =>
-      _updateImmerState(stateKey, fn, key),
+    updateImmerState: (fn: (draftState: any) => void) =>
+      _updateImmerState(fn, key),
   };
 };
 
@@ -206,17 +196,13 @@ const _updateGlobalStateByKey = <K, ValueType = any>(
  */
 const _updateGlobalImmerState = <K>(
   globalKey: K,
-  stateKey: string,
   fn: (draftState: any) => void,
 ) => {
-  const globalState = getStoreValue(globalKey, STORE_TYPE.GLOBAL_STATE);
-  const baseState = globalState?.value?.[stateKey];
-  const nextState = produce(baseState, (draftState) => {
+  const globalState = getStoreValue(globalKey, STORE_TYPE.GLOBAL_STATE).value;
+  const nextState = produce(globalState, (draftState) => {
     fn(draftState);
   });
-  _updateGlobalStateByKey(globalKey, {
-    [stateKey]: nextState,
-  });
+  _updateGlobalStateByKey(globalKey, nextState);
 };
 /**
  * hooks，获取全局 view 对应的state，仅view 适用
@@ -228,10 +214,7 @@ const _updateGlobalImmerState = <K>(
  */
 type ReturnGlobalStateType = {
   updateGlobalState: Dispatch<SetStateAction<any>>;
-  updateGlobalImmerState: (
-    stateKey: string,
-    fn: (draftState: any) => void,
-  ) => void;
+  updateGlobalImmerState: (fn: (draftState: any) => void) => void;
 };
 const useGlobalState = <K, State>(
   key: K,
@@ -255,8 +238,8 @@ const useGlobalState = <K, State>(
     ...current?.value,
     updateGlobalState: (incomingValue) =>
       _updateGlobalStateByKey(key, incomingValue),
-    updateGlobalImmerState: (stateKey: string, fn: (draftState: any) => void) =>
-      _updateGlobalImmerState(key, stateKey, fn),
+    updateGlobalImmerState: (fn: (draftState: any) => void) =>
+      _updateGlobalImmerState(key, fn),
   };
 };
 
