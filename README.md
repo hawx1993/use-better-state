@@ -57,7 +57,7 @@ export const Parent = () => {
 
   const updateUserInfo = () => {
     updateImmerState(draft => {
-      draft.age = 11;
+      draft.user.age = 11;
     });
   };
   // log: user: {name: 'nilu', age: 11}
@@ -90,7 +90,7 @@ export const Parent = () => {
 
   const updateGlobalUser = () => {
     updateGlobalImmerState(draft => {
-      draft.age = 21;
+      draft.userInfo.age = 21;
     });
   };
   return (
